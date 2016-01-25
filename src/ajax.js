@@ -17,7 +17,7 @@ var ajax = (function () {
         return options;
     }
 
-    var default_options: {
+    var default_options ={
             url: null,
             type: 'GET',
             data: null,
@@ -27,7 +27,7 @@ var ajax = (function () {
             error: function () { return true; }
         },
 
-        x = function () {
+        getx = function () {
             if (window.XMLHttpRequest !== undefined) {
                 return new window.XMLHttpRequest();
             }
@@ -50,16 +50,21 @@ var ajax = (function () {
             return xhr;
         },
         send = function (passed_options) {
-            var x = x(),
+            var x = getx(),
                 options = filloptions(passed_options, default_options),
                 query = [],
                 key;
             x.open(options.type, options.url, options.sync);
             x.onreadystatechange = function () {
+                var response = null;
                 if (x.readyState === window.XMLHttpRequest.DONE) {
                     if (x.status === 200) {
                         if (typeof options.success === 'function') {
-                            options.success(x.responseText);
+                            response = x.responseText;
+                            if (response.charAt( 0 ) === '[' || response.charAt( 0 ) === '{') {
+                                response = JSON.parse(response);
+                            }
+                            options.success(response);
                         }
                     } else {
                         if (typeof options.error === 'function') {
