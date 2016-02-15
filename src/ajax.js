@@ -17,6 +17,16 @@ var ajax = (function () {
         return options;
     }
 
+    function toUriRequest(obj) {
+        query = [];
+        for (key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                query.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
+            }
+        }
+        return obj.join('&');
+    }
+
     var default_options ={
             url: null,
             type: 'GET',
@@ -54,6 +64,11 @@ var ajax = (function () {
                 options = filloptions(passed_options, default_options),
                 query = [],
                 key;
+
+            if(option.type === 'GET' && option.data.length > 0) {
+                options.url = options.url + '?' + toUriRequest(options.data);
+            }
+
             x.open(options.type, options.url, options.sync);
             x.onreadystatechange = function () {
                 var response = null;
@@ -82,13 +97,7 @@ var ajax = (function () {
                     if (options.data.toString() === '[object FormData]') {
                         x.send(options.data);
                     } else {
-                        query = [];
-                        for (key in options.data) {
-                            if (options.data.hasOwnProperty(key)) {
-                                query.push(encodeURIComponent(key) + '=' + encodeURIComponent(options.data[key]));
-                            }
-                        }
-                        x.send(query.join('&'));
+                        x.send(toUriRequest(options.data));
                     }
                 } else {
                     x.send();
